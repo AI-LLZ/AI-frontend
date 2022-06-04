@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "esModuleInterop": true,
+    "jsx": "react",
+    "lib": ["dom", "ESNext"],
+    "module": "CommonJS",
+    "outDir": "./build/",
+    "target": "es5"
+  },
+  "exclude": [".yarn/**/*", "build/**/*"],
+  "include": ["./src/**/*"]
+}
