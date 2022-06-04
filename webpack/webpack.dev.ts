@@ -10,6 +10,7 @@ export default merge<Configuration>(BaseConfig, {
     hot: true,
     port: 3000
   },
+  devtool: "eval-cheap-module-source-map",
   mode: "development",
   module: {
     rules: [

@@ -6,6 +6,7 @@ import { merge } from "webpack-merge";
 import BaseConfig from "./webpack.base";
 
 export default merge<Configuration>(BaseConfig, {
+  devtool: "source-map",
   mode: "production",
   module: {
     rules: [

@@ -1,15 +1,29 @@
 .App {
   font-family: "jf-openhuninn", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #22272e;
+  height: 100vh;
 }
 
 .App__header {
+  align-items: center;
   display: flex;
-  background-color: #ea5b76;
-  color: #fff;
-  padding: 20px;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem;
 }
 
 .App__title {
+  color: #ffffff;
   font-size: calc(1em + 2vw);
-  margin-right: 20px;
+  margin-bottom: 1em;
+}
+
+.App__record {
+  background: none;
+  border-radius: 1.5rem;
+  border: 2px solid #ea5b76;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: calc(0.5em + 1vw);
+  padding: 1rem 2rem;
 }
