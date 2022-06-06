@@ -48,13 +48,11 @@
     ]
   },
   "name": "frontend",
-  "packageManager": "yarn@3.2.1",
   "private": true,
   "scripts": {
     "build": "react-scripts build",
     "format": "prettier --write .",
     "postinstall": "husky install",
-    "prebuild": "yarn format",
     "start": "react-scripts start"
   }
 }
