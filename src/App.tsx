@@ -1,19 +1,18 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import type { ChangeEventHandler } from "react";
+import RecordRTC from "recordrtc";
 
 import ProgressBar from "./components/ProgressBar";
 import "./App.css";
-import RecordRTC from "recordrtc";
 
 const App = () => {
   const [recording, setRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-  const [recorder, setRecorder] = useState<RecordRTC | null>(null);
   const [progress, setProgress] = useState(0);
 
   const fileRef = useRef<HTMLInputElement | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
+  const handleRecord = async () => {
     if (!navigator.mediaDevices) {
       console.error("media API not supported");
       return;
@@ -29,31 +28,66 @@ const App = () => {
       type: "audio"
     };
 
-    navigator.mediaDevices
-      .getUserMedia({ audio: true })
-      .then(s => setRecorder(new RecordRTC(s, recorderOptions)))
-      .catch(e => console.error(e));
-  }, []);
-
-  const handleRecord = useCallback(() => {
-    if (!recorder) return;
-
-    if (progress !== 100) {
-      if (!recording) {
-        recorder.reset();
-        setProgress(0);
-        recorder.startRecording();
-
-        setRecording(true);
-      } else {
-        recorder.stopRecording(() => {
-          setRecording(false);
-          setAudioBlob(recorder.getBlob());
-        });
-      }
-    } else {
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (e) {
+      console.error("cannot access microphone, please upload file instead");
+      return;
     }
-  }, [recorder, recording, progress]);
+    const recorder = new RecordRTC(stream, recorderOptions);
+
+    setRecording(true);
+    recorder.startRecording();
+
+    for (let i = 1; i <= 20; i++) {
+      await new Promise(r => setTimeout(r, 300));
+      setProgress(i * 5);
+    }
+
+    recorder.stopRecording(() => {
+      setAudioBlob(recorder.getBlob());
+      setRecording(false);
+      recorder.destroy();
+    });
+  };
+
+  const handleUpload: ChangeEventHandler<HTMLInputElement> = e => {
+    const filelist = e.target.files;
+    if (filelist === null) return;
+    const file = filelist[0];
+    if (!file.type.match(/audio\/(x-)?wav/)) {
+      console.error(file.type, "is not an wav file");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      const data = e.target!.result;
+      if (data === null) return;
+      setProgress(100);
+      setAudioBlob(new Blob([data]));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = async () => {
+    if (audioBlob === null) return;
+    if (process.env.REACT_APP_API_URL === undefined) {
+      console.error("REACT_APP_API_URL is not defined");
+      return;
+    }
+    const response = await fetch(process.env.REACT_APP_API_URL, {
+      body: audioBlob,
+      method: "POST",
+      mode: "cors"
+    });
+    if (!response.ok) {
+      console.error(response);
+      return;
+    }
+    console.log(response);
+  };
 
   return (
     <div className="App">
@@ -63,23 +97,35 @@ const App = () => {
         <div className="App__buttons">
           <button
             className="App__button"
-            disabled={recorder === null}
+            hidden={audioBlob !== null}
+            disabled={recording}
             onClick={handleRecord}
           >
-            {recorder ? (recording ? "stop" : "record") : "loading..."}
+            {recording ? "recording..." : "record"}
           </button>
           <button
             className="App__button"
+            hidden={audioBlob !== null}
             onClick={() => fileRef.current?.click()}
           >
-            upload
+            upload <sup>*</sup>
+          </button>
+          <button
+            className="App__button"
+            hidden={audioBlob === null}
+            onClick={handleSubmit}
+          >
+            submit
           </button>
           <input
             type="file"
             ref={fileRef}
-            style={{ display: "none" }}
-            onChange={() => {}}
+            hidden={true}
+            onChange={handleUpload}
           />
+        </div>
+        <div className="App__comment" hidden={audioBlob !== null}>
+          <sup>*</sup> currently supports wav only
         </div>
       </header>
     </div>

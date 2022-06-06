@@ -1,6 +1,6 @@
 # frontend
 
-Using React, TypeScript, Webpack, Babel and Yarn v2.
+Using create-react-app and TypeScript.
 
 ## how to start
 

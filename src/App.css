@@ -19,6 +19,10 @@
   margin: 1em 0;
 }
 
+.App__buttons {
+  display: flex;
+}
+
 .App__button {
   background: none;
   border-radius: 1.5rem;
@@ -28,4 +32,10 @@
   font-size: calc(0.5em + 1vw);
   padding: 1rem 2rem;
   margin: 1em;
+}
+
+.App__comment {
+  color: #ffffff;
+  font-size: calc(10px + 0.1vw);
+  margin: 1em 0;
 }
