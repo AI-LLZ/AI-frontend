@@ -8,4 +8,5 @@
   height: 100%;
   background: #ea5b76;
   border-radius: inherit;
+  transition: ease-in-out 1s;
 }

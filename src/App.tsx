@@ -2,84 +2,70 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import ProgressBar from "./components/ProgressBar";
 import "./App.css";
+import RecordRTC from "recordrtc";
 
 const App = () => {
   const [recording, setRecording] = useState(false);
-  const [canSubmit, setCanSubmit] = useState(false);
-  const [recorder, setRecorder] = useState<MediaRecorder | null>(null);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [recorder, setRecorder] = useState<RecordRTC | null>(null);
+  const [progress, setProgress] = useState(0);
 
-  const audioChunks = useRef<Blob[]>([]);
-  const timer = useRef<NodeJS.Timeout | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const init = async () => {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        let s: MediaStream;
-        try {
-          s = await navigator.mediaDevices.getUserMedia({
-            audio: { sampleRate: 44100, sampleSize: 16, channelCount: 1 }
-          });
-        } catch (e) {
-          console.error(e);
-          return;
-        }
-        const r = new MediaRecorder(s, { mimeType: "audio/webm" });
-        r.ondataavailable = e => {
-          if (e.data.size > 0) audioChunks.current.push(e.data);
-        };
-        setRecorder(r);
-      } else console.error("media API not supported");
+    if (!navigator.mediaDevices) {
+      console.error("media API not supported");
+      return;
+    }
+
+    const recorderOptions: RecordRTC.Options = {
+      disableLogs: true,
+      mimeType: "audio/wav",
+      numberOfAudioChannels: 1,
+      sampleRate: 44100,
+      recorderType: RecordRTC.StereoAudioRecorder,
+      timeSlice: 1000,
+      type: "audio"
     };
-    init();
+
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then(s => setRecorder(new RecordRTC(s, recorderOptions)))
+      .catch(e => console.error(e));
   }, []);
 
-  const record = useCallback(() => {
-    if (!canSubmit) {
-      if (recorder) {
-        const stopRecording = () => {
-          recorder.stop();
+  const handleRecord = useCallback(() => {
+    if (!recorder) return;
+
+    if (progress !== 100) {
+      if (!recording) {
+        recorder.reset();
+        setProgress(0);
+        recorder.startRecording();
+
+        setRecording(true);
+      } else {
+        recorder.stopRecording(() => {
           setRecording(false);
-          setCanSubmit(true);
-        };
-        if (!recording) {
-          recorder.start();
-          setRecording(true);
-          timer.current = setTimeout(stopRecording, 5000);
-        } else {
-          if (timer.current) {
-            clearTimeout(timer.current);
-            timer.current = null;
-          }
-          stopRecording();
-        }
+          setAudioBlob(recorder.getBlob());
+        });
       }
     } else {
-      const blob = new Blob(audioChunks.current, {
-        type: audioChunks.current[0].type
-      });
-      const req = new XMLHttpRequest();
-      req.open("POST", `${process.env.HOST}/api/upload`, true);
-      req.setRequestHeader("Content-Type", blob.type);
-      req.setRequestHeader("Content-Transfer-Encoding", "base64");
-      req.onload = () => {
-        if (req.status === 200) {
-          console.log("uploaded");
-        } else {
-          console.error("upload failed");
-        }
-      };
-      req.send(blob);
     }
-  }, [canSubmit, recorder, recording]);
+  }, [recorder, recording, progress]);
 
   return (
     <div className="App">
       <header className="App__header">
         <div className="App__title">Frontend Title</div>
-        <ProgressBar completed={40} />
+        <ProgressBar completed={progress} />
         <div className="App__buttons">
-          <button className="App__button" onClick={record}>
+          <button
+            className="App__button"
+            disabled={recorder === null}
+            onClick={handleRecord}
+          >
             {recorder ? (recording ? "stop" : "record") : "loading..."}
           </button>
           <button
