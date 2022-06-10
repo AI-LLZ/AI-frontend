@@ -22,6 +22,16 @@
   margin: 0.5em 0;
 }
 
+.App__positive {
+  margin-left: 0.5em;
+  color: #2cc17d;
+}
+
+.App__negative {
+  margin-left: 0.5em;
+  color: #ea5b76;
+}
+
 .App__buttons {
   display: flex;
 }

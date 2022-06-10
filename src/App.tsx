@@ -13,6 +13,7 @@ const App = () => {
   const [hideUI, setHideUI] = useState(false);
   const [hideSubmit, setHideSubmit] = useState(true);
   const [showThanks, setShowThanks] = useState(false);
+  const [prediction, setPrediction] = useState(false);
 
   const [payload, dispatchPayload] = useReducer(formReducer, null);
 
@@ -124,6 +125,13 @@ const App = () => {
     });
     if (!response.ok) console.error(response);
 
+    const result = await response.text();
+    if (result === "positive") setPrediction(true);
+    else if (result === "negative") setPrediction(false);
+    else {
+      console.error("invalid response from server, assuming negative");
+      setPrediction(false);
+    }
     setShowThanks(true);
   };
 
@@ -146,7 +154,15 @@ const App = () => {
     <div className="App">
       <header className="App__header">
         {showThanks ? (
-          <div className="App__title">Thank you for your submission!</div>
+          <>
+            <div className="App__title">Thank you for your submission!</div>
+            <div className="App__subtitle">
+              The prediction result is:
+              <span className={`App__${prediction ? "positive" : "negative"}`}>
+                {prediction ? "positive" : "negative"}
+              </span>
+            </div>
+          </>
         ) : (
           <>
             <div className="App__title">AI 2022 final project</div>
