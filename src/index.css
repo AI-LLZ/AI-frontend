@@ -10,3 +10,7 @@
     url(https://cdn.jsdelivr.net/gh/marsnow/open-huninn-font@1.1/font/jf-openhuninn.svg#SealmemoryHeader)
       format("svg");
 }
+
+body {
+  background: #22272e;
+}

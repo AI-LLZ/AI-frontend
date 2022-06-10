@@ -1,19 +1,20 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useReducer } from "react";
 import type { ChangeEventHandler } from "react";
 import RecordRTC from "recordrtc";
 
 import ProgressBar from "./components/ProgressBar";
-import Form from "./components/Form";
+import Form, { formReducer } from "./components/Form";
 import "./App.css";
 
 const App = () => {
   const [stage, setStage] = useState<number>(0);
   const [coughProgress, setProgress] = useState(0);
   const [recording, setRecording] = useState(false);
-  const [payload, setPayload] = useState<FormPayload | null>(null);
   const [hideUI, setHideUI] = useState(false);
   const [hideSubmit, setHideSubmit] = useState(true);
   const [showThanks, setShowThanks] = useState(false);
+
+  const [payload, dispatchPayload] = useReducer(formReducer, null);
 
   const blobListRef = useRef<Blob[]>([]);
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -56,7 +57,7 @@ const App = () => {
       blobListRef.current.push(blob);
       setStage(s => {
         // next stage is 4, which is time to show the checkbox
-        if (stage === 3) setPayload({});
+        if (stage === 3) dispatchPayload({ type: "reset" });
         return s + 1;
       });
       setRecording(false);
@@ -84,7 +85,7 @@ const App = () => {
       blobListRef.current.push(blob);
       setStage(s => {
         // next stage is 4, which is time to show the checkbox
-        if (stage === 3) setPayload({});
+        if (stage === 3) dispatchPayload({ type: "reset" });
         return s + 1;
       });
       setProgress(100);
@@ -118,7 +119,7 @@ const App = () => {
     formData.append("heavy_cough", blobListRef.current[1]);
     formData.append("soft_breath", blobListRef.current[2]);
     formData.append("heavy_breath", blobListRef.current[3]);
-    formData.append("have_covid", payload.toString());
+    formData.append("form", JSON.stringify(payload));
     console.log(formData);
     const response = await fetch(process.env.REACT_APP_API_URL, {
       body: formData,
@@ -142,7 +143,9 @@ const App = () => {
           <>
             <div className="App__title">Frontend Title</div>
             <ProgressBar completed={coughProgress} />
-            {payload === null ? null : <Form setPayload={setPayload} />}
+            {payload === null ? null : (
+              <Form payload={payload} dispatchPayload={dispatchPayload} />
+            )}
             <div className="App__buttons">
               {hideUI ? null : (
                 <>

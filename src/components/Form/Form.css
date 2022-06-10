@@ -1,0 +1,25 @@
+.Form {
+  display: flex;
+  flex-direction: column;
+  font-family: "jf-openhuninn", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: calc(0.6em + 0.4vw);
+}
+
+.Form__group {
+  padding: 1em 0;
+}
+
+.Form__grid {
+  padding: 1em 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.Form__grid-item {
+  padding: 0.5em;
+}
+
+.Form__grid-item > label {
+  padding-left: 0.5em;
+}
