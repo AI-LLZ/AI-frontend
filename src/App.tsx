@@ -7,7 +7,7 @@ import Form, { formReducer } from "./components/Form";
 import "./App.css";
 
 const App = () => {
-  const [stage, setStage] = useState<number>(0);
+  const [stage, setStage] = useState(0);
   const [coughProgress, setProgress] = useState(0);
   const [recording, setRecording] = useState(false);
   const [hideUI, setHideUI] = useState(false);
@@ -110,41 +110,61 @@ const App = () => {
     }
 
     // this should not happen, but just in case
-    if (payload === null) {
-      return;
-    }
+    if (payload === null) return;
 
     const formData = new FormData();
-    formData.append("soft_cough", blobListRef.current[0]);
-    formData.append("heavy_cough", blobListRef.current[1]);
-    formData.append("soft_breath", blobListRef.current[2]);
-    formData.append("heavy_breath", blobListRef.current[3]);
+    for (let i = 0; i < 4; i++)
+      formData.append(stageToString(i), blobListRef.current[i]);
     formData.append("form", JSON.stringify(payload));
-    console.log(formData);
+
     const response = await fetch(process.env.REACT_APP_API_URL, {
       body: formData,
       method: "POST",
       mode: "cors"
     });
-    if (!response.ok) {
-      console.error(response);
-      return;
-    }
-    console.log(response);
+    if (!response.ok) console.error(response);
+
     setShowThanks(true);
+  };
+
+  const stageToString = (stage: number) => {
+    switch (stage) {
+      case 0:
+        return "soft_cough";
+      case 1:
+        return "heavy_cough";
+      case 2:
+        return "soft_breath";
+      case 3:
+        return "heavy_breath";
+      default:
+        return "";
+    }
   };
 
   return (
     <div className="App">
       <header className="App__header">
         {showThanks ? (
-          <div>Thank you for your submission!</div>
+          <div className="App__title">Thank you for your submission!</div>
         ) : (
           <>
-            <div className="App__title">Frontend Title</div>
-            <ProgressBar completed={coughProgress} />
+            <div className="App__title">AI 2022 final project</div>
+            {hideUI ? null : (
+              <>
+                <div className="App__subtitle">
+                  Please record your {stageToString(stage).replace("_", " ")}
+                </div>
+                <ProgressBar completed={coughProgress} />
+              </>
+            )}
             {payload === null ? null : (
-              <Form payload={payload} dispatchPayload={dispatchPayload} />
+              <>
+                <div className="App__subtitle">
+                  Please fill out the form below
+                </div>
+                <Form payload={payload} dispatchPayload={dispatchPayload} />
+              </>
             )}
             <div className="App__buttons">
               {hideUI ? null : (

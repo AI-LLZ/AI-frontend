@@ -42,47 +42,54 @@ const Form = ({ payload, dispatchPayload }: FormProps) => {
 
   return (
     <div className="Form">
-      <div className="Form__group">
-        <label>Age</label>
-        <input
-          type="number"
-          min={0}
-          max={120}
-          onChange={e =>
-            dispatchPayload({
-              type: "age",
-              value: parseInt(e.target.value, 10)
-            })
-          }
-          value={payload.age}
-        />
-        <label>Gender</label>
-        <select
-          value={payload.gender}
-          onChange={e =>
-            dispatchPayload({ type: "gender", value: e.target.value })
-          }
-        >
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <div className="Form__group">
-        <label>My vaccination status: </label>
-        <select
-          value={payload.vaccination}
-          onChange={e =>
-            dispatchPayload({
-              type: "vaccination",
-              value: parseInt(e.target.value, 10)
-            })
-          }
-        >
-          <option value={2}>2 doses</option>
-          <option value={1}>1 dose</option>
-          <option value={0}>0 dose</option>
-        </select>
+      <div className="Form__grid">
+        <div className="Form__grid-item">
+          <label>Age</label>
+          <input
+            className="Form__input"
+            max={120}
+            min={0}
+            onChange={e =>
+              dispatchPayload({
+                type: "age",
+                value: parseInt(e.target.value, 10)
+              })
+            }
+            type="number"
+            value={payload.age}
+          />
+        </div>
+        <div className="Form__grid-item">
+          <label>Gender</label>
+          <select
+            className="Form__input"
+            onChange={e =>
+              dispatchPayload({ type: "gender", value: e.target.value })
+            }
+            value={payload.gender}
+          >
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div className="Form__grid-item">
+          <label>My vaccination status</label>
+          <select
+            className="Form__input"
+            onChange={e =>
+              dispatchPayload({
+                type: "vaccination",
+                value: parseInt(e.target.value, 10)
+              })
+            }
+            value={payload.vaccination}
+          >
+            <option value={2}>2 doses</option>
+            <option value={1}>1 dose</option>
+            <option value={0}>0 dose</option>
+          </select>
+        </div>
       </div>
       <div>Check the following if it matches you.</div>
       <div className="Form__grid">
